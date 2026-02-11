@@ -30,14 +30,22 @@ input, button, textarea {
 input[type="email"],
 input[type="password"],
 input[type="text"] {
-  background: #fff;
-  color: #18120e;
-  border: 1.5px solid #ff9800;
-  border-radius: 8px;
-  padding: 0.7em 1em;
-  margin-bottom: 0.5em;
+  background: linear-gradient(115deg, #fffbe7 0%, #faf3e3 100%);
+  color: #78592f;
+  border: 1px solid #ffe9b7;
+  border-radius: 12px;
+  padding: 0.6em 1em;
+  margin-bottom: 0.8em;
+  box-shadow: 0 2px 12px 0 #ffd59140;
   outline: none;
-  transition: border 0.2s;
+  font-size: 0.95em;
+  font-family: 'Pretendard', 'Outfit', 'Sora', 'Segoe UI', sans-serif;
+  letter-spacing: 0.02em;
+  transition: box-shadow 0.18s, border 0.18s, background 0.26s;
+}
+input:focus, button:focus, textarea:focus {
+  outline: none;
+  box-shadow: none;
 }
 input:focus {
   border-color: #ffb74d;
