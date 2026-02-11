@@ -1,9 +1,7 @@
 function StartPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white">
-      <h1 className="text-5xl font-extrabold text-[#22C55E] tracking-tight select-none" style={{letterSpacing: '-0.03em'}}>
-        PickCard
-      </h1>
+    <main style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none'}}>
+      <h1 style={{fontSize: '3.2em', letterSpacing: '-0.03em'}}>PickCard</h1>
     </main>
   )
 }
