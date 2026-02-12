@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react'
 import StartPage from './Pages/StartPage'
 import LoginPage from './Pages/LoginPage'
 import SignupPage from './Pages/SignupPage'
-// import MainPage from './Pages/MainPage'
+import MainPage from './Pages/MainPage'
 
 function App() {
-  const [page, setPage] = useState('splash') // splash, login, signup
+  const [page, setPage] = useState('splash') // splash, login, signup, main
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     if (page === 'splash') {
@@ -15,12 +16,27 @@ function App() {
     }
   }, [page])
 
+  const goMain = (data) => {
+    setUser(data?.user ?? null)
+    setPage('main')
+  }
+
   return (
     <div className="app-container">
       {page === 'splash' && <StartPage />}
-      {page === 'login' && <LoginPage onSignup={() => setPage('signup')} />}
-      {page === 'signup' && <SignupPage onLogin={() => setPage('login')} />}
-      {/* {page === 'main' && <MainPage />} */}
+      {page === 'login' && (
+        <LoginPage
+          onSignup={() => setPage('signup')}
+          onLoginSuccess={goMain}
+        />
+      )}
+      {page === 'signup' && (
+        <SignupPage
+          onLogin={() => setPage('login')}
+          onSignupSuccess={goMain}
+        />
+      )}
+      {page === 'main' && <MainPage user={user} />}
     </div>
   )
 }

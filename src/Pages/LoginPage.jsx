@@ -1,12 +1,66 @@
-function LoginPage({ onSignup }) {
+import { useState } from 'react'
+import { signInWithPopup } from 'firebase/auth'
+import { login } from '../api/auth'
+import { auth, googleProvider } from '../firebase'
+
+function LoginPage({ onSignup, onLoginSuccess }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const data = await login({ email, password })
+      if (data.token) localStorage.setItem('token', data.token)
+      onLoginSuccess?.(data)
+    } catch (err) {
+      setError(err.message || '로그인에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleGoogleLogin() {
+    if (!auth || !googleProvider) {
+      setError('Firebase 설정이 필요합니다. .env 파일을 확인해 주세요.')
+      return
+    }
+    setError('')
+    setGoogleLoading(true)
+    try {
+      const result = await signInWithPopup(auth, googleProvider)
+      const user = result.user
+      const token = await user.getIdToken()
+      if (token) localStorage.setItem('token', token)
+      onLoginSuccess?.({
+        user: { id: user.uid, email: user.email, displayName: user.displayName },
+        token,
+      })
+    } catch (err) {
+      setError(
+        err.code === 'auth/popup-closed-by-user'
+          ? ''
+          : err.message || 'Google 로그인에 실패했습니다.'
+      )
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
   return (
     <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none'}}>
-      <form style={{width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: '1em', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0, marginBottom: 0}}>
+      <form onSubmit={handleSubmit} style={{width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: '1em', background: 'none', borderRadius: 0, boxShadow: 'none', padding: 0, marginBottom: 0}}>
         <h2 style={{fontSize: '2em', marginBottom: '0.5em', textAlign: 'center'}}>로그인</h2>
-        <input type="email" placeholder="이메일" />
-        <input type="password" placeholder="비밀번호" />
-        <button type="submit" style={{marginTop: '0.5em'}}>로그인</button>
-        <button type="button" style={{
+        {error && <p style={{color: '#d32f2f', fontSize: '0.9em', margin: 0}}>{error}</p>}
+        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} required />
+        <button type="submit" style={{marginTop: '0.5em'}} disabled={loading}>{loading ? '로그인 중...' : '로그인'}</button>
+        <button type="button" onClick={handleGoogleLogin} disabled={googleLoading} style={{
           marginTop: '0.5em',
           background: '#fff',
           color: '#ff9800',
@@ -18,7 +72,7 @@ function LoginPage({ onSignup }) {
           fontWeight: 'bold',
         }}>
           <svg width="20" height="20" viewBox="0 0 48 48" style={{display:'inline'}}><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.23l6.85-6.85C35.97 2.09 30.36 0 24 0 14.82 0 6.73 5.1 2.69 12.55l7.98 6.2C12.13 13.13 17.62 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.01l7.19 5.6C43.98 37.09 46.1 31.3 46.1 24.55z"/><path fill="#FBBC05" d="M9.67 28.75A14.5 14.5 0 0 1 9.5 24c0-1.65.28-3.24.77-4.75l-7.98-6.2A23.93 23.93 0 0 0 0 24c0 3.93.94 7.65 2.69 10.95l7.98-6.2z"/><path fill="#EA4335" d="M24 48c6.36 0 11.7-2.1 15.6-5.7l-7.19-5.6c-2 1.36-4.56 2.17-8.41 2.17-6.38 0-11.87-3.63-13.33-8.75l-7.98 6.2C6.73 42.9 14.82 48 24 48z"/></g></svg>
-          Google로 로그인
+          {googleLoading ? '로그인 중...' : 'Google로 로그인'}
         </button>
         <div style={{textAlign: 'center', marginTop: '0.5em'}}>
           <span style={{fontSize: '0.95em', color: '#ffb74d'}}>계정이 없으신가요? </span>
